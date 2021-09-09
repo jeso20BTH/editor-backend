@@ -7,6 +7,7 @@ const port = 1337;
 
 const index = require('./routes/index');
 const hello = require('./routes/hello');
+const db = require('./routes/db');
 
 app.use(cors());
 app.use(express.json());
@@ -17,7 +18,8 @@ app.use((req, res, next) => {
 })
 
 app.use('/', index);
-app.use('/hello', hello)
+app.use('/hello', hello);
+app.use('/db', db);
 
 // don't show the log when it is test
 if (process.env.NODE_ENV !== 'test') {
