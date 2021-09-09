@@ -1,0 +1,22 @@
+{
+  "name": "me-api",
+  "version": "1.0.0",
+  "description": "Backend part for an dokument editor",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js",
+    "production": "cross-env NODE_ENV=production node app.js"
+  },
+  "author": "Jesper Stolt",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "mongodb": "^4.1.1",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
+  }
+}
