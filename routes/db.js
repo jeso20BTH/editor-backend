@@ -10,8 +10,6 @@ router.get("/", async (req, res) => {
 })
 
 router.post("/", async (req, res) => {
-    console.log(req.body);
-    console.log(res.body);
     let doc = {
         name: req.body.name,
         html: req.body.html
@@ -25,21 +23,29 @@ router.post("/", async (req, res) => {
 })
 
 router.put("/", async (req, res) => {
-    console.log(req.body);
-    console.log(res.body);
     let doc = {
         name: req.body.name,
         html: req.body.html
-    }
+    };
 
-    result = await database.addOne(doc);
+    let _id = req.body._id;
+
+    result = await database.updateOneObject(_id, doc);
 
     if (result.acknowledged) {
         return res.status(204).send();
     }
 })
 
+router.delete("/", async (req, res) => {
+    let _id = req.body._id;
 
+    result = await database.deleteOneObject(_id);
+
+    if (result.ok) {
+        return res.status(204).send();
+    }
+})
 
 router.get("/reset", async (req, res) => {
     await database.resetDb();

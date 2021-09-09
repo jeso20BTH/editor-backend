@@ -54,13 +54,44 @@ const database = {
 
         return resultSet;
     },
-    updateOne: async function updateOne(_id, doc) {
-        const filter = { _id: ObjectId(body["_id"]) };
+    updateOneObject: async function updateOneObject(_id, doc) {
+        db = await database.getDb();
 
-        const result = await db.collection.updateOne(
+        const filter = { _id: ObjectId(_id) };
+
+        updateDoc = {
+            $set: {
+                name: doc.name,
+                html: doc.html
+            }
+        }
+
+        options = { upsert: false };
+
+        console.log(filter);
+
+        const resultSet = await db.collection.updateOne(
             filter,
-            doc,
+            updateDoc,
+            options
         );
+
+        await db.client.close();
+
+        return resultSet;
+    },
+    deleteOneObject: async function deleteOneObject(_id) {
+        db = await database.getDb();
+
+        const query = { _id: ObjectId(_id) };
+
+        const resultSet = await db.collection.findOneAndDelete(
+            query
+        );
+
+        await db.client.close();
+
+        return resultSet;
     }
 };
 
