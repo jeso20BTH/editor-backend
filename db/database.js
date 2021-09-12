@@ -1,5 +1,6 @@
 const mongo = require("mongodb").MongoClient;
 const ObjectId = require('mongodb').ObjectId;
+const config = require('./config.json');
 // const config = reequire("./config.json");
 const collectionName = "docs";
 
@@ -9,9 +10,11 @@ const docs = JSON.parse(fs.readFileSync(
     path.resolve(__dirname, "reset.json")
 ))
 
+const port = process.env.PORT || 1337;
+
 const database = {
     getDb: async function getDb () {
-        let dns = `mongodb://localhost:27017/editor`;
+        let dns = `mongodb+srv://${config.username}:${config.password}@cluster0.3ghzl.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 
         if (process.env.NODE_ENV === 'test') {
             dns = `mongodb://localhost:27017/test`
@@ -62,7 +65,8 @@ const database = {
         updateDoc = {
             $set: {
                 name: doc.name,
-                html: doc.html
+                html: doc.html,
+                date: doc.date
             }
         }
 
