@@ -6,7 +6,7 @@ This is an guide for how to get started and runing this API online.
 
 ## Download the repository
 ```
-git clone https://github.com/jeso20BTH/editor
+git clone https://github.com/jeso20BTH/editor-backend
 ```
 
 ## MongoDB
