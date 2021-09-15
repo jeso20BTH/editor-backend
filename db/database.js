@@ -8,16 +8,16 @@ const fs = require("fs");
 const path = require ("path");
 const docs = JSON.parse(fs.readFileSync(
     path.resolve(__dirname, "reset.json")
-))
-
-const port = process.env.PORT || 1337;
+));
 
 const database = {
-    getDb: async function getDb () {
-        let dns = `mongodb+srv://${config.username}:${config.password}@cluster0.3ghzl.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
+    getDb: async function getDb() {
+        let dns = `mongodb+srv://
+        ${config.username}:${config.password}@cluster0.3ghzl.mongodb.net/
+        myFirstDatabase?retryWrites=true&w=majority`;
 
         if (process.env.NODE_ENV === 'test') {
-            dns = `mongodb://localhost:27017/test`
+            dns = `mongodb://localhost:27017/test`;
         }
 
         const client = await mongo.connect(dns, {
@@ -28,12 +28,13 @@ const database = {
         const collection = await db.collection(collectionName);
 
         return {
+            db: db,
             collection: collection,
             client: client
         };
     },
     resetDb: async function reset() {
-        db = await database.getDb();
+        let db = await database.getDb();
 
         await db.collection.deleteMany();
         await db.collection.insertMany(docs);
@@ -49,7 +50,7 @@ const database = {
         return resultSet;
     },
     addOne: async function addOne(doc) {
-        db = await database.getDb();
+        const db = await database.getDb();
 
         const resultSet = await db.collection.insertOne(doc);
 
@@ -58,21 +59,19 @@ const database = {
         return resultSet;
     },
     updateOneObject: async function updateOneObject(_id, doc) {
-        db = await database.getDb();
+        const db = await database.getDb();
 
         const filter = { _id: ObjectId(_id) };
 
-        updateDoc = {
+        let updateDoc = {
             $set: {
                 name: doc.name,
                 html: doc.html,
                 date: doc.date
             }
-        }
+        };
 
-        options = { upsert: false };
-
-        console.log(filter);
+        let options = { upsert: false };
 
         const resultSet = await db.collection.updateOne(
             filter,
@@ -85,7 +84,7 @@ const database = {
         return resultSet;
     },
     deleteOneObject: async function deleteOneObject(_id) {
-        db = await database.getDb();
+        let db = await database.getDb();
 
         const query = { _id: ObjectId(_id) };
 

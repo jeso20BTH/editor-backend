@@ -1,83 +1,92 @@
 let express = require('express');
 let router = express.Router();
 
-let database = require('./../db/database')
+let database = require('./../db/database');
 
 router.get("/", async (req, res) => {
     const resultSet = await database.findAll();
 
     res.json(resultSet);
-})
+});
 
 router.post("/", async (req, res) => {
-    let that = this;
-        let today = new Date();
-        let offset = today.getTimezoneOffset();
-        console.log(offset);
-        let y = today.getFullYear();
-        let m = today.getMonth();
+    let today = new Date();
+    let offset = today.getTimezoneOffset();
+    let y = today.getFullYear();
+    let m = today.getMonth();
+    let d = today.getDate();
+    let h = today.getHours();
+    let mm = today.getMinutes();
+    let s = today.getSeconds();
 
-        if (m < 10) {
-            m = `0${m}`
-        }
-        let d = today.getDate();
-        if (d < 10) {
-            d = `0${d}`
-        }
+    h += (-offset/60);
 
-        let h = today.getHours();
-        if (h < 10) {
-            h = `0${h}`
-        }
-        let mm = today.getMinutes();
-        if (mm < 10) {
-            mm = `0${mm}`
-        }
-        let s = today.getSeconds();
-        if (s < 10) {
-            s = `0${s}`
-        }
+    if (m < 10) {
+        m = `0${m}`;
+    }
+
+    if (d < 10) {
+        d = `0${d}`;
+    }
+
+    if (h < 10) {
+        h = `0${h}`;
+    }
+
+    if (mm < 10) {
+        mm = `0${mm}`;
+    }
+
+    if (s < 10) {
+        s = `0${s}`;
+    }
 
     let dateString = `${y}-${m}-${d} ${h}:${mm}:${s}`;
     let doc = {
         name: (req.body.name && req.body.name.length > 0) ? req.body.name : "New document",
         html: req.body.html,
         date: dateString
-    }
+    };
 
-    result = await database.addOne(doc);
+    let result = await database.addOne(doc);
 
     if (result.acknowledged) {
         return res.status(201).json({_id: result.insertedId});
     }
-})
+});
 
 router.put("/", async (req, res) => {
     let today = new Date();
     let offset = today.getTimezoneOffset();
-    console.log(offset);
     let y = today.getFullYear();
     let m = today.getMonth();
+    let d = today.getDate();
+    let h = today.getHours();
+    let mm = today.getMinutes();
+    let s = today.getSeconds();
+
+    h += (-offset/60);
 
     if (m < 10) {
-        m = `0${m}`
-    }
-    let d = today.getDate();
-    if (d < 10) {
-        d = `0${d}`
+        m = `0${m}`;
     }
 
-    let h = today.getHours();
+    if (d < 10) {
+        d = `0${d}`;
+    }
+
+
     if (h < 10) {
-        h = `0${h}`
+        h = `0${h}`;
     }
-    let mm = today.getMinutes();
+
     if (mm < 10) {
-        mm = `0${mm}`
+        mm = `0${mm}`;
     }
-    let s = today.getSeconds();
+
+
     if (s < 10) {
-        s = `0${s}`
+        s = `0${s}`;
     }
 
     let dateString = `${y}-${m}-${d} ${h}:${mm}:${s}`;
@@ -89,27 +98,27 @@ router.put("/", async (req, res) => {
 
     let _id = req.body._id;
 
-    result = await database.updateOneObject(_id, doc);
+    let result = await database.updateOneObject(_id, doc);
 
     if (result.acknowledged) {
         return res.status(204).send();
     }
-})
+});
 
 router.delete("/", async (req, res) => {
     let _id = req.body._id;
 
-    result = await database.deleteOneObject(_id);
+    let result = await database.deleteOneObject(_id);
 
     if (result.ok) {
         return res.status(204).send();
     }
-})
+});
 
 router.get("/reset", async (req, res) => {
     await database.resetDb();
 
-    res.redirect('/db')
-})
+    res.redirect('/db');
+});
 
 module.exports = router;

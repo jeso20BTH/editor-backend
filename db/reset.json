@@ -1,3 +1,6 @@
 [
-    {}
+    {
+        "name": "reset",
+        "html": "<p>this is what you get for reset</p>"
+    }
 ]

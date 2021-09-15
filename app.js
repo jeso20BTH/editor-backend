@@ -6,10 +6,6 @@ const bodyParser = require('body-parser');
 const app = express();
 const port = process.env.PORT || 1337;
 
-
-
-const index = require('./routes/index');
-const hello = require('./routes/hello');
 const db = require('./routes/db');
 
 app.use(cors());
@@ -18,13 +14,11 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use((req, res, next) => {
-    console.log(req.method);
-    console.log(req.path);
+    // console.log(req.method);
+    // console.log(req.path);
     next();
-})
+});
 
-app.use('/', index);
-app.use('/hello', hello);
 app.use('/db', db);
 
 // don't show the log when it is test
@@ -35,13 +29,14 @@ if (process.env.NODE_ENV !== 'test') {
 
 app.use((req, res, next) => {
     let err = new Error("Not Found");
+
     err.status = 404;
     next(err);
-})
+});
 
 app.use((err, req, res, next) => {
     if (res.headersSent) {
-        return next(err)
+        return next(err);
     }
 
     res.status(err.status || 500).json({
@@ -53,13 +48,8 @@ app.use((err, req, res, next) => {
             }
         ]
     });
-})
+});
 
+const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
-
-
-
-
-
-// Start up server
-app.listen(port, () => console.log(`Example API listening on port ${port}!`));
+module.exports = server;
