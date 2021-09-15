@@ -1,9 +1,9 @@
 const mongo = require("mongodb").MongoClient;
 const ObjectId = require('mongodb').ObjectId;
+
 let config;
 let username;
 let password;
-
 
 try {
     config = require('./config.json');
