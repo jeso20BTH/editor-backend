@@ -8,7 +8,7 @@ let password;
 try {
     config = require('./config.json');
 } catch (e) {
-    console.log(e);;
+    console.log(e);
 }
 
 username = process.env.USERNAME || config.username;
