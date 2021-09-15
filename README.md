@@ -1,3 +1,5 @@
+[![Build Status](https://app.travis-ci.com/jeso20BTH/editor-backend.svg?branch=main)](https://app.travis-ci.com/jeso20BTH/editor-backend)
+
 # API for an mongoDB made editor
 This is an API made of an mongoDB databas and express in JavaScript.
 

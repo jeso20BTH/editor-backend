@@ -1,6 +1,19 @@
 const mongo = require("mongodb").MongoClient;
 const ObjectId = require('mongodb').ObjectId;
-const config = require('./config.json');
+let config;
+let username;
+let password;
+
+
+try {
+    config = require('./config.json');
+} catch (e) {
+    continue;
+}
+
+username = process.env.USERNAME || config.username;
+password = process.env.PASSWORD || config.password;
+
 // const config = reequire("./config.json");
 const collectionName = "docs";
 
@@ -13,7 +26,7 @@ const docs = JSON.parse(fs.readFileSync(
 const database = {
     getDb: async function getDb() {
         let dns = `mongodb+srv://
-        ${config.username}:${config.password}@cluster0.3ghzl.mongodb.net/
+        ${username}:${password}@cluster0.3ghzl.mongodb.net/
         myFirstDatabase?retryWrites=true&w=majority`;
 
         if (process.env.NODE_ENV === 'test') {
