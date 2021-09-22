@@ -14,6 +14,8 @@ try {
 username = process.env.USERNAME || config.username;
 password = process.env.PASSWORD || config.password;
 
+
+
 // const config = reequire("./config.json");
 const collectionName = "docs";
 
@@ -25,13 +27,22 @@ const docs = JSON.parse(fs.readFileSync(
 
 const database = {
     getDb: async function getDb() {
-        let dns = `mongodb+srv://
-        ${username}:${password}@cluster0.3ghzl.mongodb.net/
-        myFirstDatabase?retryWrites=true&w=majority`;
+        console.log(process.env.NODE_ENV);
+        let pre = 'mongodb+srv://';
+        let credentials = `${username}:${password}`;
+        let url = '@cluster0.3ghzl.mongodb.net/myFirstDatabase?retryWrites=true&w=majority';
+        let dns = `${pre}${credentials}${url}`;
+
+
+        console.log(dns);
+        console.log("");
+
 
         if (process.env.NODE_ENV === 'test') {
             dns = `mongodb://localhost:27017/test`;
         }
+        console.log(dns);
+        console.log("");
 
         const client = await mongo.connect(dns, {
             useNewUrlParser: true,
