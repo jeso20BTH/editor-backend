@@ -1,5 +1,4 @@
 const mongo = require("mongodb").MongoClient;
-const ObjectId = require('mongodb').ObjectId;
 
 let config;
 let username;
@@ -11,38 +10,26 @@ try {
     console.log(e);
 }
 
-username = process.env.USERNAME || config.username;
+console.log(process.env.DBUSER);
+username = process.env.DBUSER || config.username;
 password = process.env.PASSWORD || config.password;
 
 
 
 // const config = reequire("./config.json");
-const collectionName = "docs";
-
-const fs = require("fs");
-const path = require ("path");
-const docs = JSON.parse(fs.readFileSync(
-    path.resolve(__dirname, "reset.json")
-));
+const collectionName = "users";
 
 const database = {
     getDb: async function getDb() {
-        console.log(process.env.NODE_ENV);
         let pre = 'mongodb+srv://';
         let credentials = `${username}:${password}`;
         let url = '@cluster0.3ghzl.mongodb.net/myFirstDatabase?retryWrites=true&w=majority';
         let dns = `${pre}${credentials}${url}`;
 
 
-        console.log(dns);
-        console.log("");
-
-
         if (process.env.NODE_ENV === 'test') {
             dns = `mongodb://localhost:27017/test`;
         }
-        console.log(dns);
-        console.log("");
 
         const client = await mongo.connect(dns, {
             useNewUrlParser: true,
@@ -56,69 +43,6 @@ const database = {
             collection: collection,
             client: client
         };
-    },
-    resetDb: async function reset() {
-        let db = await database.getDb();
-
-        await db.collection.deleteMany();
-        await db.collection.insertMany(docs);
-
-        await db.client.close();
-    },
-    findAll: async function findAll() {
-        const db = await database.getDb();
-        const resultSet = await db.collection.find({}).toArray();
-
-        await db.client.close();
-
-        return resultSet;
-    },
-    addOne: async function addOne(doc) {
-        const db = await database.getDb();
-
-        const resultSet = await db.collection.insertOne(doc);
-
-        await db.client.close();
-
-        return resultSet;
-    },
-    updateOneObject: async function updateOneObject(_id, doc) {
-        const db = await database.getDb();
-
-        const filter = { _id: ObjectId(_id) };
-
-        let updateDoc = {
-            $set: {
-                name: doc.name,
-                html: doc.html,
-                date: doc.date
-            }
-        };
-
-        let options = { upsert: false };
-
-        const resultSet = await db.collection.updateOne(
-            filter,
-            updateDoc,
-            options
-        );
-
-        await db.client.close();
-
-        return resultSet;
-    },
-    deleteOneObject: async function deleteOneObject(_id) {
-        let db = await database.getDb();
-
-        const query = { _id: ObjectId(_id) };
-
-        const resultSet = await db.collection.findOneAndDelete(
-            query
-        );
-
-        await db.client.close();
-
-        return resultSet;
     }
 };
 

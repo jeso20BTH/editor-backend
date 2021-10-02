@@ -1,6 +1,31 @@
 [
     {
-        "name": "reset",
-        "html": "<p>this is what you get for reset</p>"
+        "name": "test",
+        "email": "test@test.se",
+        "password": "$2a$10$qiSpqwQZJ2xIqPWcHNGKd.SNzkafnkMlBZc4qAoi3qAh.tc.bn162",
+        "documents": [
+            {
+                "name": "new document",
+                "html": "<p>This is an new document</p>",
+                "allowed_users": []
+            },
+            {
+                "name": "new document",
+                "html": "<p>This is an new document</p>",
+                "allowed_users": []
+            }
+        ]
+    },
+    {
+        "name": "test",
+        "email": "testa@test.se",
+        "password": "$2a$10$qiSpqwQZJ2xIqPWcHNGKd.SNzkafnkMlBZc4qAoi3qAh.tc.bn162",
+        "documents": [
+            {
+                "name": "new document",
+                "html": "<p>This is an new document</p>",
+                "allowed_users": []
+            }
+        ]
     }
 ]

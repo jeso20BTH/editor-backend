@@ -6,6 +6,8 @@ const bodyParser = require('body-parser');
 const app = express();
 const httpServer = require("http").createServer(app);
 
+const userModel = require('./models/userModel');
+
 console.log((process.env.NODE_ENV ==='production') ?
     'https://www.student.bth.se/~jeso20/editor/' :
     "http://localhost:3000");
@@ -13,56 +15,25 @@ console.log((process.env.NODE_ENV ==='production') ?
 const io = require("socket.io")(httpServer, {
     cors: {
         origin: 'https://www.student.bth.se',
+        'Access-Control-Allow-Origin': 'https://www.student.bth.se',
         // origin: 'http://localhost:3000',
-        methods: ["GET", "POST"]
+        methods: ["GET", "POST", "PUT"]
     }
 });
 
-function getDate() {
-    let today = new Date();
-    let y = today.getFullYear();
-    let m = today.getMonth();
-    let d = today.getDate();
-    let h = today.getHours();
-    let mm = today.getMinutes();
-    let s = today.getSeconds();
-
-    if (m < 10) {
-        m = `0${m}`;
-    }
-
-    if (d < 10) {
-        d = `0${d}`;
-    }
-
-    if (h < 10) {
-        h = `0${h}`;
-    }
-
-    if (mm < 10) {
-        mm = `0${mm}`;
-    }
-
-    if (s < 10) {
-        s = `0${s}`;
-    }
-
-    return `${y}-${m}-${d} ${h}:${mm}:${s}`;
-}
-
 io.sockets.on('connection', function(socket) {
-    let dateString = getDate();
+    let dateString = userModel.getDate();
 
     //Prints to the log, when a user joins.
     console.log(`${dateString} - User connected - ${socket.id}`);
 
     socket.on('create', function(data) {
-        dateString = getDate();
+        dateString = userModel.getDate();
 
         // Prints when a user joins an room
         console.log(`${dateString} - left room - ${data.oldId}`);
 
-        socket.leave(data.oldId)
+        socket.leave(data.oldId);
         // Prints when a user joins an room
         console.log(`${dateString} - joint room - ${data.newId}`);
         socket.join(data.newId);
@@ -80,21 +51,20 @@ io.sockets.on('connection', function(socket) {
 const port = process.env.PORT || 1337;
 
 const db = require('./routes/db');
+const auth = require('./routes/auth');
 
 
 
 app.use(cors());
-// app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use((req, res, next) => {
-    // console.log(req.method);
-    // console.log(req.path);
     next();
 });
 
 app.use('/db', db);
+app.use('/auth', auth);
 
 // don't show the log when it is test
 if (process.env.NODE_ENV !== 'test') {
@@ -125,6 +95,6 @@ app.use((err, req, res, next) => {
     });
 });
 
-const server = httpServer.listen(port, () => console.log(`Example app listening on port ${port}!`));
+const server = httpServer.listen(port, () => console.log(`API is listening on port ${port}!`));
 
 module.exports = server;
