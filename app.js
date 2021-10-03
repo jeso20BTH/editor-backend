@@ -70,6 +70,9 @@ app.use('/auth', auth);
 if (process.env.NODE_ENV !== 'test') {
     // use morgan to log at command line
     app.use(morgan('combined')); // 'combined' outputs the Apache style LOGs
+
+
+
 }
 
 app.use((req, res, next) => {
@@ -95,6 +98,10 @@ app.use((err, req, res, next) => {
     });
 });
 
-const server = httpServer.listen(port, () => console.log(`API is listening on port ${port}!`));
+const server = httpServer;
+
+if (process.env.NODE_ENV !== 'test') {
+    server.listen(port, () => console.log(`API is listening on port ${port}!`));
+}
 
 module.exports = server;

@@ -130,7 +130,7 @@ const userModel = {
         await db.client.close();
 
         if (resultSet.modifiedCount > 0) {
-            return res.json({
+            return res.status(201).json({
                 message: 'New document added',
                 _id: documentId
             });
@@ -140,7 +140,6 @@ const userModel = {
         const db = await database.getDb();
         const filter = { _id: ObjectId(req.body._id)};
 
-        console.log(req.body);
 
         const userOriginal = await userModel.findOneByFilter(filter);
         let userCopy = {};
@@ -157,7 +156,6 @@ const userModel = {
 
         if (req.body.allowed_users) {
             userToAdd = await userModel.findOneByFilter({email: req.body.allowed_users});
-            console.log(userToAdd);
         }
 
         userOriginal.documents.forEach((document) => {
@@ -190,7 +188,7 @@ const userModel = {
 
         await db.client.close();
 
-        return res.json(resultSet);
+        return res.status(204).json(resultSet);
     },
     deleteOneDocument: async function updateOneObject(req, res) {
         const db = await database.getDb();
@@ -219,7 +217,7 @@ const userModel = {
 
         await db.client.close();
 
-        return await userModel.findAllDocumentsForUser(req, res);
+        return await res.status(204).json(userModel.findAllDocumentsForUser(req, res));
     },
     resetData: async function(req, res) {
         resetData.forEach((user) => {

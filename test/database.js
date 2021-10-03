@@ -9,194 +9,337 @@ const chaiHttp = require('chai-http');
 
 const server = require('../app.js');
 
-chai.should();
+let shoud = chai.should();
+let expect = chai.expect;
 
 const database = require("../db/database.js");
-const collectionName = "docs";
+const collectionName = "users";
+
+
 
 chai.use(chaiHttp);
 
-describe('db', () => {
-    beforeEach(() => {
-        return new Promise(async (resolve) => {
-            const db = await database.getDb();
+describe('Test the routes for the database.', () => {
+    let token;
+    let userId;
+    let documentId;
 
-            db.db.listCollections(
-                { name: collectionName }
-            )
-                .next()
-                .then(async function(info) {
-                    if (info) {
-                        await db.collection.drop();
-                    }
-                })
-                .catch(function(err) {
-                    console.error(err);
-                })
-                .finally(async function() {
-                    await db.client.close();
-                    resolve();
-                });
+    describe('User handeling', () => {
+        before(() => {
+            return new Promise(async (resolve) => {
+                const db = await database.getDb();
+
+                db.db.listCollections(
+                    { name: collectionName }
+                )
+                    .next()
+                    .then(async function(info) {
+                        if (info) {
+                            await db.collection.drop();
+                        }
+                    })
+                    .catch(function(err) {
+                        console.error(err);
+                    })
+                    .finally(async function() {
+                        await db.client.close();
+                        resolve();
+                    });
+            });
         });
-    });
 
-    it('Added document', (done) => {
-        let doc = {
-            name: "test",
-            html: "<p>test</p>"
-        };
+        it('Added user', async () => {
+            let user = {
+                email: 'test@test.se',
+                name: "test",
+                password: "test"
+            };
 
-        chai.request(server)
-            .post("/db")
-            .send(doc)
-            .end((err, res) => {
-                res.should.have.status(201);
-                res.body.should.be.an("object");
-                res.body._id.should.be.an("string");
+            let res = await chai.request(server)
+                .post("/auth/register")
+                .send(user)
 
-                let id = res.body._id;
+            res.should.have.status(201);
+            res.body.token.should.not.equal(null);
+            res.body.message.should.equal('Successful register!');
 
-                chai.request(server)
-                    .get("/db")
-                    .end((err, res) => {
-                        res.should.have.status(200);
-                        res.body.should.be.an("array");
-                        res.body[0].date.should.be.an("string");
-                        res.body[0].date.length.should.equal(19);
-                        res.body[0].name.should.equal(doc.name);
-                        res.body[0].html.should.equal(doc.html);
-                        res.body[0]._id.should.equal(id);
+        });
 
-                        done();
-                    });
-            });
-    });
+        it('Add same user twice', async () => {
+            let user = {
+                email: 'test@test.se',
+                name: "test",
+                password: "test"
+            };
 
-    it('Reset database', (done) => {
-        chai.request(server)
-            .get("/db/reset")
-            .end((err, res) => {
+            res = await chai.request(server)
+                .post("/auth/register")
+                .send(user)
+
+            res.should.have.status(500);
+            res.body.error.should.equal('user already registered!');
+        });
+
+        it('Added second unique user', async () => {
+            let user = {
+                email: 'testa@test.se',
+                name: "testa",
+                password: "testa"
+            };
+
+            let res = await chai.request(server)
+                .post("/auth/register")
+                .send(user)
+
+            res.should.have.status(201);
+            res.body.token.should.not.equal(null);
+            res.body.message.should.equal('Successful register!');
+
+        });
+
+
+        it('Login an user successfully', async () => {
+            let user = {
+                email: 'test@test.se',
+                password: "test"
+            };
+
+            let res = await chai.request(server)
+                .post("/auth/login")
+                .send(user)
+
+            res.should.have.status(200);
+            res.body.token.should.not.equal(null);
+
+
+            token = res.body.token;
+            userId = res.body.userId;
+            // console.log(res.body);
+
+
+        });
+
+        it('Login an user failed', async () => {
+            let user = {
+                email: 'test@test.se',
+                password: "tes"
+            };
+
+            let res = await chai.request(server)
+                .post("/auth/login")
+                .send(user)
+
+            res.should.have.status(500);
+            res.body.message.should.equal('Unsuccessful login!');
+
+
+        });
+
+        describe('Document handeling', () => {
+            it('Get documents no documents document', async () => {
+                user = {
+                    _id: userId
+                }
+
+                res = await chai.request(server)
+                    .post("/db/document")
+                    .set('x-access-token', token)
+                    .send(user)
+
                 res.should.have.status(200);
-                res.body.should.be.an("array");
-                res.body.length.should.equal(1);
-                res.body[0].name.should.be.equal("reset");
-
-                done();
+                res.body.owner.should.be.an("array");
+                res.body.access.should.be.an("array");
+                res.body.owner.length.should.be.equal(0);
+                res.body.access.length.should.be.equal(0);
             });
-    });
 
-    it('Update document', (done) => {
-        let doc = {
-            name: "test",
-            html: "<p>test</p>"
-        };
-        let updateDoc = {
-            name: "test2",
-            html: "<p>test2</p>"
-        };
+            it('Add one document', async () => {
+                let doc = {
+                    name: 'Test',
+                    html: '<p>Test</p>',
+                    _id: userId
+                }
+                res = await chai.request(server)
+                    .post("/db/document/add")
+                    .set('x-access-token', token)
+                    .send(doc)
 
-        chai.request(server)
-            .post("/db")
-            .send(doc)
-            .end((err, res) => {
+                documentId = res.body._id
+
                 res.should.have.status(201);
-                res.body.should.be.an("object");
-                res.body._id.should.be.an("string");
-
-                let id = res.body._id;
-
-                updateDoc._id = id;
-
-                chai.request(server)
-                    .get("/db")
-                    .end((err, res) => {
-                        // console.log(res.body);
-                        res.should.have.status(200);
-                        res.body.should.be.an("array");
-                        res.body[0].date.should.be.an("string");
-                        res.body[0].date.length.should.equal(19);
-                        res.body[0].name.should.equal(doc.name);
-                        res.body[0].html.should.equal(doc.html);
-                        res.body[0]._id.should.equal(id);
-
-                        chai.request(server)
-                            .put("/db")
-                            .send(updateDoc)
-                            .end((err, res) => {
-                                res.should.have.status(204);
-
-
-                                chai.request(server)
-                                    .get("/db")
-                                    .end((err, res) => {
-                                        res.should.have.status(200);
-                                        res.body.should.be.an("array");
-                                        res.body[0].date.should.be.an("string");
-                                        res.body[0].date.length.should.equal(19);
-                                        res.body[0].name.should.equal(updateDoc.name);
-                                        res.body[0].html.should.equal(updateDoc.html);
-                                        res.body[0]._id.should.equal(id);
-
-                                        done();
-                                    });
-                            });
-                    });
+                res.body.message.should.be.equal('New document added');
+                res.body._id.length.should.not.be.equal(0);
             });
-    });
 
-    it('Delete document', (done) => {
-        let doc = {
-            name: "test",
-            html: "<p>test</p>"
-        };
-        let doc2 = {
-            name: "test2",
-            html: "<p>test2</p>"
-        };
+            it('Get documents after adding one for owner', async () => {
+                user = {
+                    _id: userId
+                }
 
-        chai.request(server)
-            .post("/db")
-            .send(doc)
-            .end((err, res) => {
-                res.should.have.status(201);
-                res.body.should.be.an("object");
-                res.body._id.should.be.an("string");
+                res = await chai.request(server)
+                    .post("/db/document")
+                    .set('x-access-token', token)
+                    .send(user)
 
-                let id = res.body._id;
-
-                chai.request(server)
-                    .post("/db")
-                    .send(doc2)
-                    .end((err, res) => {
-                        res.should.have.status(201);
-                        res.body.should.be.an("object");
-                        res.body._id.should.be.an("string");
-
-                        let id2 = res.body._id;
-
-                        chai.request(server)
-                            .delete("/db")
-                            .send({ _id: id})
-                            .end((err, res) => {
-                                res.should.have.status(204);
-
-
-                                chai.request(server)
-                                    .get("/db")
-                                    .end((err, res) => {
-                                        res.should.have.status(200);
-                                        res.body.should.be.an("array");
-                                        res.body.length.should.equal(1);
-                                        res.body[0].date.should.be.an("string");
-                                        res.body[0].date.length.should.equal(19);
-                                        res.body[0].name.should.equal(doc2.name);
-                                        res.body[0].html.should.equal(doc2.html);
-                                        res.body[0]._id.should.equal(id2);
-
-                                        done();
-                                    });
-                            });
-                    });
+                res.should.have.status(200);
+                res.body.owner.should.be.an("array");
+                res.body.access.should.be.an("array");
+                res.body.owner.length.should.be.equal(1);
+                res.body.access.length.should.be.equal(0);
+                res.body.owner[0].name.should.be.equal('Test');
+                res.body.owner[0].html.should.be.equal('<p>Test</p>');
+                res.body.owner[0].allowed_users.should.be.an("array");
+                res.body.owner[0].allowed_users.length.should.be.equal(0);
+                res.body.owner[0].date.length.should.be.equal(19);
             });
-    });
+
+            it('Update document', async () => {
+                let doc = {
+                    name: 'New test',
+                    html: '<p>New test</p>',
+                    _id: userId,
+                    documentId: documentId
+                }
+                let res = await chai.request(server)
+                    .put("/db/document/update")
+                    .set('x-access-token', token)
+                    .send(doc)
+
+
+                res.should.have.status(204);
+            });
+
+            it('Get documents after update', async () => {
+                user = {
+                    _id: userId
+                }
+
+                res = await chai.request(server)
+                    .post("/db/document")
+                    .set('x-access-token', token)
+                    .send(user)
+
+                res.should.have.status(200);
+                res.body.owner.should.be.an("array");
+                res.body.access.should.be.an("array");
+                res.body.owner.length.should.be.equal(1);
+                res.body.access.length.should.be.equal(0);
+                res.body.owner[0].name.should.be.equal('New test');
+                res.body.owner[0].html.should.be.equal('<p>New test</p>');
+                res.body.owner[0].allowed_users.should.be.an("array");
+                res.body.owner[0].allowed_users.length.should.be.equal(0);
+                res.body.owner[0].date.length.should.be.equal(19);
+            });
+
+            it('Give another user access to a document', async () => {
+                let doc = {
+                    _id: userId,
+                    documentId: documentId,
+                    allowed_users: 'testa@test.se'
+                }
+
+                let res = await chai.request(server)
+                    .put("/db/document/update")
+                    .set('x-access-token', token)
+                    .send(doc)
+
+
+                res.should.have.status(204);
+            });
+
+            it('Get documents after allowed access', async () => {
+                let user = {
+                    _id: userId
+                }
+
+                let res = await chai.request(server)
+                    .post("/db/document")
+                    .set('x-access-token', token)
+                    .send(user)
+
+                res.should.have.status(200);
+                res.body.owner.should.be.an("array");
+                res.body.access.should.be.an("array");
+                res.body.owner.length.should.be.equal(1);
+                res.body.access.length.should.be.equal(0);
+                res.body.owner[0].name.should.be.equal('New test');
+                res.body.owner[0].html.should.be.equal('<p>New test</p>');
+                res.body.owner[0].allowed_users.should.be.an("array");
+                res.body.owner[0].allowed_users.length.should.be.equal(1);
+                res.body.owner[0].date.length.should.be.equal(19);
+
+                let credentials2 = {
+                    email: 'testa@test.se',
+                    password: "testa"
+                };
+
+                let resLogin = await chai.request(server)
+                    .post("/auth/login")
+                    .send(credentials2)
+
+                resLogin.should.have.status(200);
+                resLogin.body.token.should.not.equal(null);
+
+                let tempToken = resLogin.body.token;
+                let tempUserId = resLogin.body.userId;
+
+                let user2 = {
+                    _id: tempUserId
+                }
+
+                let res2 = await chai.request(server)
+                    .post("/db/document")
+                    .set('x-access-token', tempToken)
+                    .send(user2)
+
+                    res2.should.have.status(200);
+                    res2.body.owner.should.be.an("array");
+                    res2.body.access.should.be.an("array");
+                    res2.body.owner.length.should.be.equal(0);
+                    res2.body.access.length.should.be.equal(1);
+                    res2.body.access[0].name.should.be.equal('New test');
+                    res2.body.access[0].html.should.be.equal('<p>New test</p>');
+                    res2.body.access[0].allowed_users.should.be.an("array");
+                    res2.body.access[0].allowed_users.length.should.be.equal(1);
+                    res2.body.access[0].date.length.should.be.equal(19);
+                    res2.body.access[0].owner.should.be.equal(userId);
+            });
+
+            it('Delete document', async () => {
+                let doc = {
+                    _id: userId,
+                    documentId: documentId
+                };
+
+                let res = await chai.request(server)
+                    .delete("/db/document/delete")
+                    .set('x-access-token', token)
+                    .send(doc)
+
+                res.should.have.status(204);
+            });
+
+            it('Get documents after delete, should be zero documents', async () => {
+                user = {
+                    _id: userId
+                }
+
+                res = await chai.request(server)
+                    .post("/db/document")
+                    .set('x-access-token', token)
+                    .send(user)
+
+                res.should.have.status(200);
+                res.body.owner.should.be.an("array");
+                res.body.access.should.be.an("array");
+                res.body.owner.length.should.be.equal(0);
+                res.body.access.length.should.be.equal(0);
+            });
+        })
+    })
+
+
+
+
+
 });

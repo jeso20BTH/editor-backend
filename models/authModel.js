@@ -25,12 +25,11 @@ const authModel = {
         let emailExists = await authModel.checkIfEmailExists(data.email);
 
         if (!emailExists) {
-            console.log('Email okay');
             let password = authModel.hashifyPassword(res, data);
-
-            console.log(password);
         } else {
-            console.log('Email already registered');
+            return res.status(500).json({
+                error: 'user already registered!'
+            });
         }
     },
     decryptPassword: function(res, plainPassword, user) {
@@ -48,7 +47,7 @@ const authModel = {
                     success: true
                 });
             } else {
-                return res.status(201).json({
+                return res.status(500).json({
                     message: 'Unsuccessful login!'
                 });
             }
@@ -76,13 +75,11 @@ const authModel = {
                 allowed_user: []
             });
 
-            console.log(createdUser);
-
             if (createdUser) {
                 let payload = {_id: createdUser.insertedId};
                 let token = jwt.sign(payload, config.secret, {expiresIn: '1h'});
 
-                return res.json({
+                return res.status(201).json({
                     message: 'Successful register!',
                     token: token,
                     userId: createdUser.insertedId,
@@ -98,13 +95,10 @@ const authModel = {
 
         jwt.verify(token, secret, function(err, decoded) {
             if (err) {
-                console.log('*error');
                 return res.status(500).json({
                     message: "Error"
                 });
             }
-
-            console.log(decoded);
 
             // Valid token send on the request
             next();
