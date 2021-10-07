@@ -1,3 +1,15 @@
+const visual = false;
+const { graphqlHTTP } = require('express-graphql');
+const {
+    GraphQLSchema
+} = require("graphql");
+
+const RootQueryType = require('./graphql/root');
+
+const schema = new GraphQLSchema({
+    query: RootQueryType
+});
+
 const express = require("express");
 const morgan = require('morgan');
 const cors = require('cors');
@@ -52,8 +64,7 @@ const port = process.env.PORT || 1337;
 
 const db = require('./routes/db');
 const auth = require('./routes/auth');
-
-
+const authModel = require('./models/authModel')
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -63,8 +74,16 @@ app.use((req, res, next) => {
     next();
 });
 
+
+
 app.use('/db', db);
 app.use('/auth', auth);
+
+app.use(authModel.verifyToken);
+app.use('/graphql', graphqlHTTP({
+    schema: schema,
+    graphiql: visual,
+}));
 
 // don't show the log when it is test
 if (process.env.NODE_ENV !== 'test') {

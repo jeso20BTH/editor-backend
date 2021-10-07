@@ -40,11 +40,41 @@ const userModel = {
 
         return `${y}-${m}-${d} ${h}:${mm}:${s}`;
     },
-    findAllUsers: async function(req, res) {
+    findAllUsers: async function(req, res=undefined) {
         const db = await database.getDb();
         const resultSet = await db.collection.find({}).toArray();
 
         await db.client.close();
+
+        if (res === undefined) {
+            return resultSet;
+        }
+
+        allowedArray = [];
+
+        resultSet.map((user) => {
+            let userDocs = []
+            user.documents.map((doc) => {
+                let userDoc = {};
+
+                doc.allowed_users.map((allowed) => {
+                    if(allowed._id.equals(ObjectId('6157581b445d27b9f65cb5dd'))) {
+                        console.log("Im equal");
+                        userDoc = doc;
+                    }
+                })
+
+                if (userDoc._id) {
+                    console.log('Im in');
+                    userDocs.push(userDoc);
+                }
+            })
+
+            if (userDocs.length > 0) {
+                user.documents = userDocs;
+                allowedArray.push(user)
+            }
+        })
 
         return res.json(resultSet);
     },
@@ -55,7 +85,7 @@ const userModel = {
             { $or:
                 [
                     {_id: ObjectId(req.body._id)},
-                    {'documents.allowed_users': ObjectId(req.body._id)}
+                    {'documents.allowed_users._id': ObjectId(req.body._id)}
                 ]
             }
         ).toArray();
@@ -73,7 +103,7 @@ const userModel = {
             } else  {
                 user.documents.map(function(document) {
                     let allowed = document.allowed_users.map(function(allowedUser) {
-                        if (allowedUser.equals(ObjectId(req.body._id))) {
+                        if (allowedUser._id.equals(ObjectId(req.body._id))) {
                             return true;
                         } else {
                             return false;
@@ -173,7 +203,7 @@ const userModel = {
                     });
 
                     if (!includes) {
-                        document.allowed_users.push(userToAdd._id);
+                        document.allowed_users.push({ _id: userToAdd._id });
                     }
                 }
             }
