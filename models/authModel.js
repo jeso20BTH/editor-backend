@@ -79,7 +79,7 @@ const authModel = {
             console.log('user Added');
             console.log(createdUser);
 
-            if (createdUser) {
+            if (createdUser.acknowledged) {
                 let payload = {_id: createdUser.insertedId};
                 let token = jwt.sign(payload, config.secret, {expiresIn: '1h'});
 
@@ -101,6 +101,8 @@ const authModel = {
                     success: true
                 });
             }
+
+            console.log('Im not in created');
         });
     },
     verifyToken: function(req, res, next) {
