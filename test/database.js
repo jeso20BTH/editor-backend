@@ -163,7 +163,7 @@ describe('Test the routes for the database.', (done) => {
             res.body.access.length.should.be.equal(0);
         });
 
-        it('Add one document', async () => {
+        it('Add one document text type', async () => {
             let doc = {
                 name: 'Test',
                 html: '<p>Test</p>',
@@ -600,6 +600,48 @@ describe('Test the routes for the database.', (done) => {
 
                     done();
                 })
+        });
+
+        it('Add one document code type', async () => {
+            let doc = {
+                name: 'Test',
+                html: 'console.log("hej");',
+                type: 'code',
+                _id: userId
+            }
+            res = await chai.request(server)
+                .post("/db/document/add")
+                .set('x-access-token', token)
+                .send(doc)
+
+            documentId = res.body._id
+
+            res.should.have.status(201);
+            res.body.message.should.be.equal('New document added');
+            res.body._id.length.should.not.be.equal(0);
+        });
+
+        it('Get documents after adding one code document', async () => {
+            user = {
+                _id: userId
+            }
+
+            res = await chai.request(server)
+                .post("/db/document")
+                .set('x-access-token', token)
+                .send(user)
+
+            res.should.have.status(200);
+            res.body.owner.should.be.an("array");
+            res.body.access.should.be.an("array");
+            res.body.owner.length.should.be.equal(1);
+            res.body.access.length.should.be.equal(0);
+            res.body.owner[0].name.should.be.equal('Test');
+            res.body.owner[0].type.should.be.equal('code');
+            res.body.owner[0].html.should.be.equal('console.log("hej");');
+            res.body.owner[0].allowed_users.should.be.an("array");
+            res.body.owner[0].allowed_users.length.should.be.equal(0);
+            res.body.owner[0].date.length.should.be.equal(19);
         });
     });
 });
