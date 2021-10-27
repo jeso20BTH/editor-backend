@@ -78,10 +78,10 @@ const authModel = {
             console.log('user Added');
             console.log(createdUser);
 
-            if (createdUser.acknowledged) {
+            if (createdUser) {
                 console.log('in sign');
                 let payload = {_id: createdUser.insertedId};
-                let token = jwt.sign(payload, config.secret, {expiresIn: '1h'});
+                let token = await jwt.sign(payload, config.secret, {expiresIn: '1h'});
 
                 console.log('you have created an user');
 
