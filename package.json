@@ -4,7 +4,7 @@
   "description": "Backend part for an dokument editor",
   "main": "app.js",
   "scripts": {
-    "test": "nyc --reporter=html --reporter=text --reporter=clover mocha --exit --timeout 10000",
+    "test": "nyc --reporter=html --reporter=text --reporter=clover mocha --exit --timeout 100000",
     "start": "node app.js",
     "devStart": "nodemon app.js",
     "production": "cross-env NODE_ENV=production node app.js",
