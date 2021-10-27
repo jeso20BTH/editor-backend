@@ -10,8 +10,8 @@ try {
     console.log(e);
 }
 
-configKey = config.sendgridapi;
-fromEmail = config.fromemail;
+configKey = process.env.SENDGRID_API_KEY || config.sendgridapi;
+fromEmail = process.env.FROM_EMAIL || config.fromemail;
 
 sgMail.setApiKey(configKey);
 
