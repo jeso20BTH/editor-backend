@@ -65,7 +65,6 @@ const authModel = {
     },
     hashifyPassword: async function(res, data) {
         const saltRounds = 10;
-        console.log('in hash');
 
         bcrypt.hash(data.password, saltRounds, async function(err, hash) {
             let createdUser = await userModel.addOneUser({
@@ -80,6 +79,7 @@ const authModel = {
             console.log(createdUser);
 
             if (createdUser.acknowledged) {
+                console.log('in sign');
                 let payload = {_id: createdUser.insertedId};
                 let token = jwt.sign(payload, config.secret, {expiresIn: '1h'});
 

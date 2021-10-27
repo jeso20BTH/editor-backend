@@ -113,18 +113,13 @@ const userModel = {
         return resultSet;
     },
     addOneUser: async function(user) {
-        console.log('in add new user');
         const db = await database.getDb();
 
         const resultSet = await db.collection.insertOne(user);
 
-        await db.client.close();
-
-        console.log('user added');
+        await db.client.close();;
 
         let counter = await userModel.newUserAddAccess({email: user.email, user: resultSet.insertedId});
-        console.log('granted access to docs: ');
-        console.log(counter);
 
         return resultSet;
     },
@@ -159,13 +154,10 @@ const userModel = {
         }
     },
     newUserAddAccess: async function(data) {
-        console.log('in access adding');
         const db = await database.getDb();
         let accesscounter = 0;
         let documentCursor = await userModel.findAllByFilter({});
         let allDocuments = documentCursor;
-        console.log('all documents gathered');
-        console.log(allDocuments);
         allDocuments.map(async (userOriginal) => {
             let changedUser = false;
             let userCopy = {};
@@ -213,8 +205,6 @@ const userModel = {
                 );
             }
         })
-
-        console.log('access added');
 
         return accesscounter;
     },
