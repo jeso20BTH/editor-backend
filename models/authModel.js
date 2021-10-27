@@ -27,7 +27,7 @@ const authModel = {
         if (!emailExists) {
             let password = authModel.hashifyPassword(res, data);
         } else {
-            return res.status(500).json({
+            res.status(500).json({
                 error: 'user already registered!'
             });
         }
@@ -47,7 +47,7 @@ const authModel = {
                     success: true
                 });
             } else {
-                return res.status(500).json({
+                res.status(500).json({
                     message: 'Unsuccessful login!'
                 });
             }
@@ -84,7 +84,7 @@ const authModel = {
                     userId: createdUser.insertedId
                 }
 
-                return res.status(201).json({
+                res.status(201).json({
                     message: 'Successful register!',
                     token: token,
                     userId: createdUser.insertedId,
@@ -100,7 +100,7 @@ const authModel = {
 
         jwt.verify(token, secret, function(err, decoded) {
             if (err) {
-                return res.status(500).json({
+                res.status(500).json({
                     message: "Error"
                 });
             }

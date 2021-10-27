@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1635339748380" clover="3.2.0">
-  <project timestamp="1635339748381" name="All files">
-    <metrics statements="481" coveredstatements="370" conditionals="114" coveredconditionals="70" methods="101" coveredmethods="54" elements="696" coveredelements="494" complexity="0" loc="481" ncloc="481" packages="5" files="21" classes="21"/>
+<coverage generated="1635357148866" clover="3.2.0">
+  <project timestamp="1635357148866" name="All files">
+    <metrics statements="481" coveredstatements="369" conditionals="118" coveredconditionals="74" methods="101" coveredmethods="54" elements="700" coveredelements="497" complexity="0" loc="481" ncloc="481" packages="5" files="21" classes="21"/>
     <package name="jsramverk-backend">
       <metrics statements="59" coveredstatements="39" conditionals="10" coveredconditionals="4" methods="8" coveredmethods="1"/>
       <file name="app.js" path="C:\Users\jeppe\OneDrive\dokument\skola\jsramverk-backend\app.js">
@@ -209,7 +209,7 @@
       </file>
     </package>
     <package name="jsramverk-backend.models">
-      <metrics statements="261" coveredstatements="216" conditionals="92" coveredconditionals="61" methods="44" coveredmethods="31"/>
+      <metrics statements="261" coveredstatements="215" conditionals="96" coveredconditionals="65" methods="44" coveredmethods="31"/>
       <file name="authModel.js" path="C:\Users\jeppe\OneDrive\dokument\skola\jsramverk-backend\models\authModel.js">
         <metrics statements="40" coveredstatements="38" conditionals="12" coveredconditionals="10" methods="9" coveredmethods="9"/>
         <line num="1" count="1" type="stmt"/>
@@ -268,15 +268,15 @@
         <line num="34" count="1" type="stmt"/>
       </file>
       <file name="mailModel.js" path="C:\Users\jeppe\OneDrive\dokument\skola\jsramverk-backend\models\mailModel.js">
-        <metrics statements="15" coveredstatements="10" conditionals="0" coveredconditionals="0" methods="3" coveredmethods="0"/>
+        <metrics statements="15" coveredstatements="10" conditionals="4" coveredconditionals="4" methods="3" coveredmethods="0"/>
         <line num="1" count="1" type="stmt"/>
         <line num="2" count="1" type="stmt"/>
         <line num="3" count="1" type="stmt"/>
         <line num="7" count="1" type="stmt"/>
         <line num="8" count="1" type="stmt"/>
         <line num="10" count="0" type="stmt"/>
-        <line num="13" count="1" type="stmt"/>
-        <line num="14" count="1" type="stmt"/>
+        <line num="13" count="1" type="cond" truecount="2" falsecount="0"/>
+        <line num="14" count="1" type="cond" truecount="2" falsecount="0"/>
         <line num="16" count="1" type="stmt"/>
         <line num="18" count="1" type="stmt"/>
         <line num="21" count="0" type="stmt"/>
@@ -306,7 +306,7 @@
         <line num="48" count="1" type="stmt"/>
       </file>
       <file name="userModel.js" path="C:\Users\jeppe\OneDrive\dokument\skola\jsramverk-backend\models\userModel.js">
-        <metrics statements="178" coveredstatements="148" conditionals="78" coveredconditionals="50" methods="27" coveredmethods="20"/>
+        <metrics statements="178" coveredstatements="147" conditionals="78" coveredconditionals="50" methods="27" coveredmethods="20"/>
         <line num="1" count="1" type="stmt"/>
         <line num="3" count="1" type="stmt"/>
         <line num="5" count="1" type="stmt"/>
@@ -327,7 +327,7 @@
         <line num="29" count="10" type="cond" truecount="1" falsecount="1"/>
         <line num="30" count="0" type="stmt"/>
         <line num="33" count="10" type="cond" truecount="1" falsecount="1"/>
-        <line num="34" count="10" type="stmt"/>
+        <line num="34" count="0" type="stmt"/>
         <line num="37" count="10" type="cond" truecount="1" falsecount="1"/>
         <line num="38" count="0" type="stmt"/>
         <line num="41" count="10" type="stmt"/>
