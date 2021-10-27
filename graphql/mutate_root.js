@@ -11,7 +11,6 @@ const {
 const UserType = require('./user');
 const DocumentType = require('./document');
 const UserDocumentType = require('./user_document');
-const CommentType = require('./comment');
 
 users = require('./../models/userModel');
 
@@ -79,29 +78,6 @@ const RootQueryType = new GraphQLObjectType({
                 user.access = allowedArray
 
                 return user;
-            }
-        },
-        comments: {
-            type: GraphQLList(CommentType),
-            description: 'Get comments for document.',
-            args: {
-                userId: { type: GraphQLString},
-                documentId: { type: GraphQLString }
-            },
-            resolve: async (parent, args) => {
-                let userArray = await users.findAllUsers();
-
-                let user = userArray.find(user => user._id.equals(ObjectId(args.userId)));
-
-                console.log(user);
-
-                console.log(args.documentId);
-
-                let doc = user.documents.find(docu => docu._id.equals(ObjectId(args.documentId)));
-
-                console.log(doc);
-
-                return doc.comments;
             }
         }
 

@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for jsramverk-backend/routes/auth.js</title>
+    <title>Code coverage report for jsramverk-backend/routes/pdf.js</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../prettify.css" />
     <link rel="stylesheet" href="../../base.css" />
@@ -19,7 +19,7 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../index.html">All files</a> / <a href="index.html">jsramverk-backend/routes</a> auth.js</h1>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">jsramverk-backend/routes</a> pdf.js</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
@@ -75,25 +75,25 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">let express = require('express');
 let router = express.Router();
 &nbsp;
-const authModel = require('./../models/authModel');
-router.post("/login", async (req, res) =&gt; {
-    await authModel.login(res, req.body);
-});
+let authModel = require('./../models/authModel');
+let pdfModel = require('./../models/pdfModel');
+router.post("/",
+    (req, res, next) =&gt; authModel.verifyToken(req, res, next),
+    async (req, res) =&gt; await pdfModel.generatePDF(req, res)
+);
 &nbsp;
-router.post("/register", async (req, res) =&gt; {
-    await authModel.register(res, req.body);
-});
+// router.get('/', (req, res) =&gt; pdfModel.sendPDF(req, res));
 &nbsp;
 module.exports = router;
 &nbsp;</pre></td></tr></table></pre>

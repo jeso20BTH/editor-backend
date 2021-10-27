@@ -79,6 +79,11 @@ const authModel = {
                 let payload = {_id: createdUser.insertedId};
                 let token = jwt.sign(payload, config.secret, {expiresIn: '1h'});
 
+                let userData = {
+                    email: data.email,
+                    userId: createdUser.insertedId
+                }
+
                 return res.status(201).json({
                     message: 'Successful register!',
                     token: token,

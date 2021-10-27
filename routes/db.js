@@ -24,6 +24,10 @@ router.delete("/document/delete",
     (req, res, next) => authModel.verifyToken(req, res, next),
     async (req, res) => await userModel.deleteOneDocument(req, res));
 
+router.delete("/user",
+    (req, res, next) => authModel.verifyToken(req, res, next),
+    async (req, res) => await userModel.deleteUser(req, res));
+
 router.put("/",
     (req, res, next) => authModel.verifyToken(req, res, next),
     async (req, res) => await userModel.resetData(req, res));

@@ -20,10 +20,6 @@ const httpServer = require("http").createServer(app);
 
 const userModel = require('./models/userModel');
 
-console.log((process.env.NODE_ENV ==='production') ?
-    'https://www.student.bth.se/~jeso20/editor/' :
-    "http://localhost:3000");
-
 const io = require("socket.io")(httpServer, {
     cors: {
         origin: 'https://www.student.bth.se',
@@ -64,6 +60,9 @@ const port = process.env.PORT || 1337;
 
 const db = require('./routes/db');
 const auth = require('./routes/auth');
+const pdf = require('./routes/pdf');
+const mail = require('./routes/mail');
+const code = require('./routes/code');
 const authModel = require('./models/authModel')
 
 app.use(cors());
@@ -78,12 +77,17 @@ app.use((req, res, next) => {
 
 app.use('/db', db);
 app.use('/auth', auth);
+app.use('/pdf', pdf);
+app.use('/mail', mail);
+app.use('/code', code)
 
 app.use(authModel.verifyToken);
 app.use('/graphql', graphqlHTTP({
     schema: schema,
     graphiql: visual,
 }));
+
+
 
 // don't show the log when it is test
 if (process.env.NODE_ENV !== 'test') {

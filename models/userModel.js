@@ -50,32 +50,6 @@ const userModel = {
             return resultSet;
         }
 
-        allowedArray = [];
-
-        resultSet.map((user) => {
-            let userDocs = []
-            user.documents.map((doc) => {
-                let userDoc = {};
-
-                doc.allowed_users.map((allowed) => {
-                    if(allowed._id.equals(ObjectId('6157581b445d27b9f65cb5dd'))) {
-                        console.log("Im equal");
-                        userDoc = doc;
-                    }
-                })
-
-                if (userDoc._id) {
-                    console.log('Im in');
-                    userDocs.push(userDoc);
-                }
-            })
-
-            if (userDocs.length > 0) {
-                user.documents = userDocs;
-                allowedArray.push(user)
-            }
-        })
-
         return res.json(resultSet);
     },
     findAllDocumentsForUser: async function(req, res) {
@@ -130,12 +104,22 @@ const userModel = {
 
         return resultSet;
     },
+    findAllByFilter: async function(filter) {
+        const db = await database.getDb();
+        const resultSet = await db.collection.find(filter).toArray();
+
+        await db.client.close();
+
+        return resultSet;
+    },
     addOneUser: async function(user) {
         const db = await database.getDb();
 
         const resultSet = await db.collection.insertOne(user);
 
         await db.client.close();
+
+        let counter = await userModel.newUserAddAccess({email: user.email, user: resultSet.insertedId});
 
         return resultSet;
     },
@@ -151,8 +135,11 @@ const userModel = {
                     _id: documentId,
                     name: req.body.name,
                     html: req.body.html,
+                    type: req.body.type,
                     date: userModel.getDate(),
-                    allowed_users: []
+                    allowed_users: [],
+                    invited_users: [],
+                    comments: []
                 }
             }
         });
@@ -166,10 +153,65 @@ const userModel = {
             });
         }
     },
+    newUserAddAccess: async function(data) {
+        const db = await database.getDb();
+        let accesscounter = 0;
+        let documentCursor = await userModel.findAllByFilter({});
+        let allDocuments = documentCursor;
+
+        allDocuments.map(async (userOriginal) => {
+            let changedUser = false;
+            let userCopy = {};
+
+            for (const [key, value] of Object.entries(userOriginal)) {
+                if (!Array.isArray(value)) {
+                    userCopy[key] = value;
+                }
+            }
+
+            userCopy.documents = [];
+
+            userOriginal.documents.forEach((doc) => {
+                let invited = false;
+                invitedUsersCopy = [];
+
+
+                if (doc.invited_users.length > 0) {
+                    doc.invited_users.forEach((invitedUser) => {
+                        if (invitedUser.email === data.email) {
+                            invited = true;
+                        } else {
+                            invitedUsersCopy.push( {email: invitedUser.email });
+                        }
+                    });
+
+                    if (invited) {
+                        doc.allowed_users.push({ _id: data.user });
+                        changedUser = true;
+                        accesscounter++;
+                    }
+                }
+
+                doc.invited_users = invitedUsersCopy;
+
+                userCopy.documents.push(doc);
+            });
+
+            if (changedUser) {
+                let filter = { _id: userOriginal._id }
+
+                await db.collection.updateOne(
+                    filter,
+                    { $set: userCopy}
+                );
+            }
+        })
+
+        return accesscounter;
+    },
     updateOneDocument: async function updateOneObject(req, res) {
         const db = await database.getDb();
         const filter = { _id: ObjectId(req.body._id)};
-
 
         const userOriginal = await userModel.findOneByFilter(filter);
         let userCopy = {};
@@ -180,35 +222,92 @@ const userModel = {
             }
         }
 
+        let documentFound = false;
+
         userCopy.documents = [];
 
         let userToAdd;
 
         if (req.body.allowed_users) {
             userToAdd = await userModel.findOneByFilter({email: req.body.allowed_users});
+
+            if (!userToAdd) {
+                userInvited = {email: req.body.allowed_users}
+            }
         }
 
-        userOriginal.documents.forEach((document) => {
-            if (ObjectId(req.body.documentId).equals(document._id)) {
-                document.name = req.body.name || document.name;
-                document.html = req.body.html || document.html;
-                document.date = userModel.getDate();
+        userOriginal.documents.forEach((doc) => {
+            if (ObjectId(req.body.documentId).equals(doc._id)) {
+                documentFound = true
+                doc.name = req.body.name || doc.name;
+                doc.html = req.body.html || doc.html;
+                doc.type = doc.type || req.body.type || 'text';
+                doc.date = userModel.getDate();
+                doc.invited_users = doc.invited_users || [];
+
                 let includes = false;
 
                 if (req.body.allowed_users) {
-                    document.allowed_users.map((id) => {
-                        if (id.equals(userToAdd._id)) {
-                            includes = true;
-                        }
-                    });
+                    if (userToAdd) {
+                        doc.allowed_users.map((id) => {
+                            if (ObjectId(userToAdd._id).equals(id)) {
+                                includes = true;
+                            }
+                        });
 
-                    if (!includes) {
-                        document.allowed_users.push({ _id: userToAdd._id });
+                        if (!includes) {
+                            doc.allowed_users.push({ _id: userToAdd._id });
+                        }
+                    } else {
+                        doc.invited_users.map((user) => {
+                            if (user.email === userInvited.email) {
+                                includes = true;
+                            }
+                        });
+
+                        if (!includes) {
+                            doc.invited_users.push(userInvited);
+                        }
                     }
+
+                }
+
+                let commentsCopy = []
+
+                if (req.body.comment) {
+                    if (req.body.comment.crud === 'add') {
+                        commentsCopy = doc.comments || [];
+
+                        commentsCopy.push({
+                            _id: new ObjectId(),
+                            number: req.body.comment.number,
+                            text: req.body.comment.text,
+                            user: req.body.comment.user,
+                            time: userModel.getDate()
+                        });
+                    } else if (req.body.comment.crud === 'update') {
+                        doc.comments.map((comment) => {
+                            if (comment._id.equals(ObjectId(req.body.comment._id))) {
+                                comment.text = req.body.comment.text;
+                                comment.time = userModel.getDate();
+                                comment.user = req.body.comment.user;
+                            }
+
+                            commentsCopy.push(comment);
+                        })
+                    } else if (req.body.comment.crud === 'delete') {
+                        doc.comments.map((comment) => {
+                            if (!comment._id.equals(ObjectId(req.body.comment._id))) {
+                                commentsCopy.push(comment);
+                            }
+                        })
+                    }
+
+                    doc.comments = commentsCopy;
                 }
             }
 
-            userCopy.documents.push(document);
+            userCopy.documents.push(doc);
         });
 
         let resultSet = await db.collection.updateOne(
@@ -247,7 +346,14 @@ const userModel = {
 
         await db.client.close();
 
-        return await res.status(204).json(userModel.findAllDocumentsForUser(req, res));
+        res.status(204).json({message: 'Element deleted.'});
+    },
+    deleteUser: async function updateOneObject(req, res) {
+        const db = await database.getDb();
+        const filter = { email: req.body.email};
+        const userOriginal = await db.collection.deleteOne(filter);
+
+        res.status(204).json({message: 'Element deleted.'});
     },
     resetData: async function(req, res) {
         resetData.forEach((user) => {
