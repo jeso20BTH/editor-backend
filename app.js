@@ -1,4 +1,4 @@
-const visual = false;
+const visual = true;
 const { graphqlHTTP } = require('express-graphql');
 const {
     GraphQLSchema
@@ -81,11 +81,12 @@ app.use('/pdf', pdf);
 app.use('/mail', mail);
 app.use('/code', code)
 
-app.use(authModel.verifyToken);
 app.use('/graphql', graphqlHTTP({
     schema: schema,
     graphiql: visual,
 }));
+app.use(authModel.verifyToken);
+
 
 
 

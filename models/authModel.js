@@ -75,22 +75,14 @@ const authModel = {
                 allowed_user: []
             });
 
-            console.log('user Added');
-            console.log(createdUser);
-
             if (createdUser) {
-                console.log('in sign');
                 let payload = {_id: createdUser.insertedId};
-                let token = await jwt.sign(payload, config.secret, {expiresIn: '1h'});
-
-                console.log('you have created an user');
+                let token = await jwt.sign(payload, secret, {expiresIn: '1h'});
 
                 let userData = {
                     email: data.email,
                     userId: createdUser.insertedId
                 }
-
-                console.log(userData);
 
                 res.status(201).json({
                     message: 'Successful register!',
@@ -101,8 +93,6 @@ const authModel = {
                     success: true
                 });
             }
-
-            console.log('Im not in created');
         });
     },
     verifyToken: function(req, res, next) {
